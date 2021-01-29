@@ -5,7 +5,9 @@ En form av text/posts applikation där användare kan göra egna posts under egn
 
 ## 2. Vyer (visa bildskisser på dina sidor).
 https://gyazo.com/150a27291be8af07a99a819effa00df6
+
 https://gyazo.com/c003aa9d2e210f9e41d78286ac8fc81a
+
 https://gyazo.com/834653998a1081654c0ab14ea86f0bd5
 
 
