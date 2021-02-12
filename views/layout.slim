@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+html lang="en"
+  head
+    meta charset="UTF-8"/
+    meta name="viewport" content="width=device-width, initial-scale=1.0"/
+    link rel="stylesheet" href="/css/style.css"/
+    title EpicForum
+  body
+    nav
+      h1 Epic Forum
+      - header3 = "Current user: #{session[:username]}"
+      h3 = header3
+      -if header3.length > 14
+        a href="/logout" Logout
+      -else
+        a href="/" Register
+        a href="/showlogin" Login
+    == yield
