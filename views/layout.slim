@@ -8,11 +8,11 @@ html lang="en"
   body
     nav
       h1 Epic Forum
-      - header3 = "Current user: #{session[:username]}"
-      h3 = header3
-      -if header3.length > 14
+      /- header3 = "Current user: #{session[:username]}"
+      /h3 = header3
+     / -if header3.length > 14
         a href="/logout" Logout
-      -else
+     / -else
         a href="/" Register
-        a href="/showlogin" Login
+        a href="/showlogin" Login 
     == yield
