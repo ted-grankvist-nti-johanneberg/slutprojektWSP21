@@ -1,8 +1,17 @@
+require 'sqlite3' #Behövs om jag vill felsöka här utan att arbeta via app.rb och model.rb. (om jag endast testkör mina funktioner t.ex)
+
 def connect_to_db(path)
     db = SQLite3::Database.new(path)
     db.results_as_hash = true
     return db
 end
+
+=begin
+def connect_to_db2(path) #För att få ut data från databasen i en array istället för hash.
+  db = SQLite3::Database.new(path)
+  return db
+end
+=end #P.g.a används ännu ej
 
 def check_registration(db, username, password, confirmpassword)
     result = db.execute("SELECT * FROM users WHERE username=?", username).first
@@ -30,8 +39,9 @@ def verify_user(username, password)
     if result != nil
       pw_digest = result["pwdigest"]
       id = result["id"]
+      usertype = result["usertype"]
       if (BCrypt::Password.new(pw_digest) == password) && (username == result["username"])
-        return [true, id] #Detta betyder att användaren blivit authenticatad
+        return [true, id, usertype] #Detta betyder att användaren blivit authenticatad. Normalt brukar jag hämta ytterligare data om användaren via nya SQL-anrop men jag ansåg det rimligt att hålla användarnamn, id, och usertype med i sessions då dessa kan komma att behövas frekvent under användarens besök på hemsidan.
       else
         return [false]
         #Fel lösenord
@@ -41,3 +51,54 @@ def verify_user(username, password)
       #Användaren finns ej, av säkerhetsskäl skrivs samma felmeddelande ut som vid endast fel lösenord. (Så att hackare inte vet att de träffat rätt användare eller dylikt)
     end
 end
+
+def collect_info_user(username, instructions)
+  #Här skall du skicka med data som sedan förklarar för funktionen
+  #Vad den skall efterfråga med sitt SQL anrop (eventuellt behöver du göra flera av dessa funktioner och kan inte ha en "standardfunktion" som täcker allt)
+end
+
+def already_logged_in?() #Kollar om det för närvarande är någon användare inloggad.
+  if session[:username] != nil
+    return true
+  else
+    return false
+  end
+end
+
+def all_subs(path)
+  db = connect_to_db(path)
+  result = db.execute("SELECT * FROM subs")
+  return result 
+end
+
+
+def subs_in_order(path) #Returnerar en lista med subs sorterade med avseende på antal prenumeranter
+  db = connect_to_db(path)
+  all_subs = all_subs(path) #Hämtar in en array med dictionaries för alla subs, skall troligen kommenteras bort eller tas bort då den för närvarande inte fyller någon funktion
+  relations = db.execute("SELECT sub_id, count(sub_id) AS amount FROM subs_users_rel GROUP BY sub_id ORDER BY amount DESC") #Får ut en array innehållande dictionaries innehållande sub_id och antalet prenumerationer som respektive sub för sub_id har, och sedan är arrayen ordnad således att dictionaryn till sub:en med flest prenumerationer kommer på position [0], näst flest på [1] osv. (fallande). Thus returneras lika många rows som det finns subs från detta anropet, en för varje sub.
+  #p "här kommer relations: #{relations}"
+  i = 0
+  sub_list_ordered = [] #En lista som kommer att byggas upp med alla subs sorterade med avseende på antal prenumenanter.
+  while i < relations.length
+    sub_hash = db.execute('SELECT * FROM subs WHERE id=?', relations[i]["sub_id"]).first #SQL-anropet tar ut en sub och all dess attribut givet ordningen från relations anropet. relations[i]["sub_id"] returnerar primärnyckeln för subben vars dictionary ligger på position i.
+    #p "här kommer sub_hash: #{sub_hash}"
+    sub_hash["amount"] = relations[i]["amount"] #Lägger till en nyckel med värdet amount från tillhörande sub-dict i relations (därav relations[i]....).
+    #p "här kommer sub_hash uppdaterad med amountvärde: #{sub_hash}"
+    sub_list_ordered << sub_hash
+    i += 1
+  end
+  return sub_list_ordered
+end 
+
+
+
+=begin
+def find_subs_where(path, condition)
+  db = connect_to_db2(path)
+  result = db.execute("SELECT * FROM subs WHERE username=? ", username).first
+  ...
+end
+=end
+
+
+

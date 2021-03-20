@@ -1,0 +1,13 @@
+a href="/forum/explore" Explore
+br
+-if session[:usertype] != "guest"
+    a href="/forum/mysubs" My Subs
+    br
+    a href="/" My Profile 
+    br
+-if session[:usertype] == "admin" 
+    a href="/" Manage database
+
+/Länkarna till vart taggarna leder kommer att ändras, "Manage database" kommer att vara ett stort verktyg för admins att crudda i princip vadsomhelst i databasen.
+/Här skall även authorization användas för att kolla om användaren är en admin, isåfall (via if-sats) skall den 
+/ -få en till länk där det står "Manage forum" eller dylikt, där den t.ex. kan ta bort användare osv.

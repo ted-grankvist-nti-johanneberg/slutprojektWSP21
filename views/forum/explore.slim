@@ -1,0 +1,11 @@
+h1 Explore
+a href="/subs/index" List of all subs
+div class="top5box" 
+    h2 Top 5 subs: 
+    - n = 0
+    - top5_subs_array.each do |a_sub| 
+        - n += 1
+        div 
+            h3 #{n}:
+            p = "Name: " + "r/" + a_sub["subname"]
+            p Number of subscribers: #{a_sub["amount"]}

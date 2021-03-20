@@ -9,10 +9,17 @@ html lang="en"
     nav
       h1 Epic Forum
       -header3 = "Current user: #{session[:username]}"
-      h3 = header3
-      -if header3.length > 14
+      -if header3.length > 14 #alternativt kan man skriva något i stil med " if session[:username] != nil"
+        h3 = header3
         a href="/logout" Logout
       -else
         a href="/" Register
-        a href="/showlogin" Login 
+        a href="/showlogin" Login
+        -if session[:usertype] == "guest"
+          a href="/forum/index" Explore
+        -else
+          a href="/guestlogin" Login as guest
+          
     == yield
+
+    
