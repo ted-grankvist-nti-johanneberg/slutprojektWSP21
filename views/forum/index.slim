@@ -1,12 +1,26 @@
-a href="/forum/explore" Explore
+br
+a href="/forum/explore"
+    button type="button" Explore
+br
 br
 -if session[:usertype] != "guest"
-    a href="/forum/mysubs" My Subs
+    a href="/forum/mysubs" 
+        button type="button" My Subs
     br
-    a href="/" My Profile 
+    br
+    a href="/"  
+        button type="button" My Profile
+    br
+    br
+    a href="/" 
+        button type="button" Create post
+    br
     br
 -if session[:usertype] == "admin" 
-    a href="/" Manage database
+    a href="/"
+        button type="button" Manage database
+    br
+    br
 
 /Länkarna till vart taggarna leder kommer att ändras, "Manage database" kommer att vara ett stort verktyg för admins att crudda i princip vadsomhelst i databasen.
 /Här skall även authorization användas för att kolla om användaren är en admin, isåfall (via if-sats) skall den 

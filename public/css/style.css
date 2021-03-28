@@ -11,11 +11,3 @@ nav {
   align-items:center;
 }
 
-.top5box {
-  height: 10vh;
-  width: 10vw;
-  display:flex;
-  flex-direction: column;
-  justify-content:center;
-  align-items:center;
-}

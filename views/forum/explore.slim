@@ -1,6 +1,16 @@
 h1 Explore
-a href="/subs/index" List of all subs
-div class="top5box" 
+a href="/forum/index" 
+    button type="button" Return to hub
+br
+br
+a href="/subs/index" 
+    button type="button" List of all subs
+br
+/Fixa flexboxes till divvarna så att de inte bara staplas på varandra rakt ner, utan på bredd på sidan.
+/En idé till "Hot posts" är att du först endast väljer posts som är tagna idag, så du går igenom hela listan sorterad efter antal comments, och för varje kontrollerar du att- 
+/- det är en post från idag/max 24h gammal elr dylikt. Varje post som du skriver ut tar du sedan bort från den gamla listan (en kopia), och när dagens hetaste posts är utsorterade och-
+/ -utprintade börjar du gå igenom den redan "gallrade" listan och skriver ut alla posts utifrån hur många comments dem har, således att om inga posts finns idag skrivs all time best posts ut
+div
     h2 Top 5 subs: 
     - n = 0
     - top5_subs_array.each do |a_sub| 
@@ -9,3 +19,14 @@ div class="top5box"
             h3 #{n}:
             p = "Name: " + "r/" + a_sub["subname"]
             p Number of subscribers: #{a_sub["amount"]}
+div 
+    h2 Hot posts:
+   
+/Tanken var att den första divven skall ha en class på sig med lite egenskaper, men när 
+/ Aktiverar klassen på elementet så buggas det och divven buggar och lägger sig över nav-baren av oförklarliga skäl.
+
+
+
+
+
+

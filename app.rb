@@ -7,7 +7,7 @@ require_relative './model.rb'
 enable :sessions
 
 get('/') do #Eventuellt skall denna route döpas om till "/users/new" men eftersom det också är förstasidan så får vi se, jag anser det vara ett befogat undantag från restful.
-    if already_logged_in?() == true #Om inloggad användare råkar kryssa ner sidan och sedan bara går in på "localhost:4567" så är den fortfarande inloggad i sessions, men i utan denna åtgärd skulle den dirigerats till registreringssidan och behövt logga ut och logga in igen för att ta sig vidare i applikationen, men nu omdirigeras inloggade användare till hubben/index istället.
+    if already_logged_in?() == true #Om inloggad användare råkar kryssa ner sidan och sedan bara går in på "localhost:4567" så är den fortfarande inloggad i sessions, men i utan denna åtgärd skulle den dirigerats till registreringssidan och behövt logga ut och logga in igen för att ta sig vidare i applikationen, men nu omdirigeras inloggade användare till /index istället.
         slim(:"forum/index")
     else #Om ingen användare är inloggad så visas registreringsmenyn
         slim(:register)
