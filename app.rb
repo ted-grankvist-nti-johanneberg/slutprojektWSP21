@@ -41,7 +41,7 @@ get('/forum/explore') do
     # upp tiden, kanske finns en session metod för att få ut exakt tid, annars får du bara köra Time.now varje gång som explore öppnas och se till att du kan konvertera Time.now till dagens datum, eller om det är inom senaste 24h eller så.
     top5_subs_array = []
     i = 0
-    while i < 5 
+    while i < 5  #Ev köra denna loopen i slim-filen istället för att göra det här, och bara skicka med ordered_subs_array istället.
         top5_subs_array << ordered_subs_array[i]
         i += 1
     end
