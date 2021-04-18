@@ -74,7 +74,7 @@ end
 
 def subs_in_order(path) #Returnerar en lista med subs sorterade med avseende på antal prenumeranter
   db = connect_to_db(path)
-  all_subs = all_subs(path) #Hämtar in en array med dictionaries för alla subs, skall troligen kommenteras bort eller tas bort då den för närvarande inte fyller någon funktion
+  all_subs = all_subs(path) #Hämtar in en array med dictionaries för alla subs, skall troligen kommenteras bort eller tas bort då den för närvarande inte fyller någon funktion inom denna funktionen.
   relationsarray = db.execute("SELECT sub_id, count(sub_id) AS amount FROM subs_users_rel GROUP BY sub_id ORDER BY amount DESC") #Får ut en array innehållande dictionaries innehållande sub_id och antalet prenumerationer som respektive sub för sub_id har, och sedan är arrayen ordnad således att dictionaryn till sub:en med flest prenumerationer kommer på position [0], näst flest på [1] osv. (fallande). Thus returneras lika många rows som det finns subs från detta anropet, en för varje sub.
   #p "här kommer relationsarray: #{relationsarray}"
   i = 0
@@ -99,14 +99,14 @@ def posts_in_order(path)
   while i < post_comment_amount.length
     post_hash = db.execute('SELECT * FROM posts WHERE id=?', post_comment_amount[i]["post_id"]).first
     post_hash["amount"] = post_comment_amount[i]["amount"]
+    # UNDER CONSTRUCTION:
     #En if sats kommer här sedan som kollar ifall posten är från idag eller inte, och alla posts från idag läggs i en lista och är således sorterade efter comments
     # Medans en annan lista, dit alla posts som ej är från idag, kommer in ordnade efter antal kommentarer
     #Sedan är det bara att i hot posts printa listan med posts från idag iterativt och sedan den andra listan iterativt.
 
     i += 1
   end
-
-
+end
 =begin
 def find_subs_where(path, condition)
   db = connect_to_db2(path)

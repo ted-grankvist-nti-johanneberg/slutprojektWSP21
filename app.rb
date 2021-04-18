@@ -54,6 +54,17 @@ get('/subs/index') do
     slim(:"subs/index", locals:{subs_array: subs_array})
 end
 
+get('/posts/new') do
+    subs = all_subs('db/forum2021.db')
+    p "here comes all the subs from app.rb:"
+    p subs
+    slim(:"posts/new", locals:{subs: subs})
+end
+
+post('/posts') do
+    
+end
+
 get('/logout') do 
     session.destroy
     redirect('/')
