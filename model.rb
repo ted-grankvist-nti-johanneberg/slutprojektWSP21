@@ -107,6 +107,13 @@ def posts_in_order(path)
     i += 1
   end
 end
+
+def add_post(content, user_id, title, sub_id, publish_date)
+  db = connect_to_db('db/forum2021.db')
+  db.execute("INSERT INTO posts (content, user_id, title, sub_id, publish_date) VALUES (?,?,?,?,?)", content, user_id, title, sub_id, publish_date)
+end
+
+
 =begin
 def find_subs_where(path, condition)
   db = connect_to_db2(path)

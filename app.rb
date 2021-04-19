@@ -2,6 +2,7 @@ require 'sinatra'
 require 'slim'
 require 'sqlite3'
 require 'bcrypt'
+require 'date'
 require_relative './model.rb'
 
 enable :sessions
@@ -56,13 +57,17 @@ end
 
 get('/posts/new') do
     subs = all_subs('db/forum2021.db')
-    p "here comes all the subs from app.rb:"
-    p subs
     slim(:"posts/new", locals:{subs: subs})
 end
 
 post('/posts') do
-    
+    sub_id = params[:subid]
+    title = params[:title]
+    content = params[:content]
+    user_id = session[:id] #Userid
+    publish_date = Time.now.strftime("%Y/%m/%d %H:%M") # Time.now.strftime("%Y/%m/%d %H:%M") #=> "2021/04/19 14:09"
+    add_post(content, user_id, title, sub_id, publish_date)
+    redirect('/forum/index')
 end
 
 get('/logout') do 
