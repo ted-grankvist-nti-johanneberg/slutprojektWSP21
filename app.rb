@@ -37,7 +37,6 @@ end
 get('/forum/explore') do
     ordered_subs_array = subs_in_order('db/forum2021.db')
     hot_posts_in_order = posts_in_order('db/forum2021.db') #Här ingår endast posts som har kommentarer - inga comments inte het
-    p hot_posts_in_order
     #Lägg till mer saker som där du t.ex. hämtar Dagens posts ordnade efter antal kommentarar. Då kan du använda
     #samma metod "SELECT sub_id, count(sub_id) AS amount FROM subs_users_rel GROUP BY sub_id ORDER BY amount DESC" (för att få fram posten i en array sorterad utifrån på hur många kommenterar de har) <- fast en del modifikationer, se https://www.youtube.com/watch?v=Nl1QNFyaCO8 samt mixtra runt lite med SQL-anrop i DB browser tills du får ut rätt.
     # Dessutom skall du vid detta också endast välja ut posts som är postad idag, vilket du kan göra med en "WHERE publish_date = Time.now" eller hur du nu väljer att strukturera
@@ -70,6 +69,35 @@ post('/posts') do
     add_post(content, user_id, title, sub_id, publish_date)
     redirect('/forum/index')
 end
+
+get('/posts/:id/edit') do
+    post_id = params[:id]
+    slim(:"posts/edit", locals:{post_id: post_id})
+end
+
+get('/posts/:id') do
+    post_id = params[:id]
+    comments = all_comments(post_id)
+    post_hash = acquire_post_data(post_id)
+    slim(:"posts/show", locals:{post_id: post_id, comments: comments, post_hash: post_hash}) #Behöver ev inte skicka med "post_id" eftersom den ändå hämtas som nyckel med värde i post_hash
+end
+
+post('/posts/:id/update') do
+    post_id = params[:id].to_i
+    content = params[:content]
+    title = params[:title]
+    update_post(content, title, post_id)
+    redirect('/forum/explore')
+end
+
+post('/posts/:id/delete') do
+    post_id = params[:id]
+    delete_post(post_id)
+    redirect('/forum/explore')
+    #Behöver on CASCADE för att ta bort alla kommentarer i databasen när en post tas bort.
+end
+
+
 
 get('/logout') do 
     session.destroy

@@ -13,27 +13,36 @@ br
 div
     h2 Top 5 subs: 
     - n = 0
-    - top5_subs_array.each do |a_sub| 
-        - n += 1
-        div 
-            h3 #{n}:
-            p = "Name: " + "r/" + a_sub["subname"]
-            p Number of subscribers: #{a_sub["amount"]}
+    ol
+        - top5_subs_array.each do |a_sub| 
+            li 
+                p = "Name: " + "r/" + a_sub["subname"]
+                p Number of subscribers: #{a_sub["amount"]}
 div 
     h2 Hot posts:
     - if hot_posts_in_order == []
         p There are no hot posts at the moment, if you write a comment on a recently published post, it'll turn hot.
     - else   
         - hot_posts_in_order.each do |a_post|
-            div 
-                h3 = a_post["title"]
-                p = a_post["content"]
+            div class="hotpost"
+                article class="contentbox"
+                    h3 = a_post["title"]
+                    p = a_post["content"]
                 br
                 /p written by #{a_sub["username"]} (skall läggas till senare)
-                p written on #{a_post["publish_date"]}
+                p Posted on #{a_post["publish_date"]}
+                p Published by user: #{a_post["username"]}
+                a href="/posts/#{a_post["id"]}" 
+                    button type="button" View post
                 br
                 br
-                br
+                -if a_post["user_id"] == session[:id] || session[:usertype] == "admin" #Endast ägaren av posten och admins kan uppdatera eller ta bort posten.
+                    a href="/posts/#{a_post["id"]}/edit" 
+                        button type="button" Edit post
+                    br
+                    br
+                    form action="/posts/#{a_post["id"]}/delete" method="POST"
+                        input type="submit" value="Delete post"
 
    
 /Tanken var att den första divven skall ha en class på sig med lite egenskaper, men när 

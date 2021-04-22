@@ -1,0 +1,17 @@
+br
+a href="/forum/explore" 
+    button type="button" Return to explore
+br
+h2 Edit post:
+form action="/posts/#{post_id}/update" method="POST"
+    input type="text" name="title"  placeholder="Enter new title, or skip"
+    br
+    br
+    textarea name="content" cols="50" rows="20" placeholder="Enter updated content here" 
+    br
+    br
+    input type="submit" value="Update!"
+
+/form action="/todos/#{result['id']}/update" method="post"
+    textarea name="content" cols="50" rows="10" placeholder="Enter new content of todo"
+    input type="submit" value="Save edit!"

@@ -11,3 +11,30 @@ nav {
   align-items:center;
 }
 
+.hotpost {
+  background-color: lightsalmon;
+  width: 30vw;
+  padding: 1.4vmax;
+  margin: 1.4vmax;
+}
+
+.contentbox{
+  background-color:salmon;
+  padding-top: 0.2vh;
+  padding-bottom: 0.2vh;
+  padding-right: 0.8vw;
+  padding-left: 0.8vw;
+}
+
+.commentsbox{
+  background-color:lightsalmon;
+}
+
+.comment {
+  background-color:pink;
+  padding-top: 0.1vh;
+  padding-bottom: 0.1vh;
+  padding-right: 0.5vw;
+  padding-left: 0.5vw;
+  margin: 1vmax;
+}

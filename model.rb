@@ -101,7 +101,8 @@ def posts_in_order(path)
   while i < post_comment_amount.length
     post_hash = db.execute('SELECT * FROM posts WHERE id=?', post_comment_amount[i]["post_id"]).first
     post_hash["amount"] = post_comment_amount[i]["amount"]
-    #Ev skicka in en ett attribut i post_hash med användarnamnet på användaren; ex post_hash["username"] = ... (hämta från users med user_id)
+    temp_user = db.execute('SELECT username FROM users WHERE id= ?', post_hash["user_id"]).first
+    post_hash["username"] = temp_user["username"] #Skickar in ett attribut i post_hash vid namn "username" med upphovsmannens användarnamn
     # UNDER CONSTRUCTION:
     #En if sats kommer här sedan som kollar ifall posten är från mellan idag och imorgon, och alla posts från mellan idag och imorgon läggs i en lista och är således sorterade efter comments
     # Medans en annan lista, dit alla posts som ej är från mellan idag och imorgon, kommer in ordnade efter antal kommentarer
@@ -130,6 +131,53 @@ def add_post(content, user_id, title, sub_id, publish_date)
   db = connect_to_db('db/forum2021.db')
   db.execute("INSERT INTO posts (content, user_id, title, sub_id, publish_date) VALUES (?,?,?,?,?)", content, user_id, title, sub_id, publish_date)
 end
+
+def update_post(content, title, post_id)
+  db = connect_to_db('db/forum2021.db')
+  if title != "" #Om titlen ej skall ändras skriver användaren inte in någon input i title-inputen i formuläret och då ändras inte post:ens titel. (om användaren inte skriver något input returneras en tom sträng)
+    db.execute("UPDATE posts SET content = ?, title = ? WHERE id = ?", content, title, post_id)
+  else
+    db.execute("UPDATE posts SET content = ? WHERE id = ?", content, post_id)
+  end
+end
+
+def delete_post(post_id)
+  db = connect_to_db('db/forum2021.db')
+  db.execute("DELETE FROM posts WHERE id = ?", post_id)
+  #Behöver ON CASCADE för att ta bort alla comments i databasen när en post tas bort.
+end
+
+def all_comments(post_id)
+  db = connect_to_db('db/forum2021.db')
+  comments = db.execute("SELECT * FROM comments WHERE post_id = ?", post_id)
+  p comments
+  if comments != nil
+    i = 0
+    while i < comments.length
+      temp_user = db.execute('SELECT username FROM users WHERE id= ?', comments[i]["user_id"]).first
+      comments[i]["username"] = temp_user["username"]
+      i += 1
+    end
+  end
+  return comments
+end
+
+=begin
+def all_posts(path)
+  db = connect_to_db('db/forum2021.db')
+  allposts = db.execute("SELECT * FROM comments")
+end
+=end
+
+def acquire_post_data(post_id)
+  db = connect_to_db('db/forum2021.db')
+  post = db.execute("SELECT * FROM posts WHERE id = ?", post_id).first
+  temp_user = db.execute('SELECT username FROM users WHERE id= ?', post["user_id"]).first
+  post["username"] = temp_user["username"] #Skickar med username i hashen till varje post
+  return post
+end
+
+
 
 
 =begin

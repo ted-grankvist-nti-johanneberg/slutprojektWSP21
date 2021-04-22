@@ -1,0 +1,30 @@
+br
+a href="/forum/explore" 
+    button type="button" Return to explore
+br
+div class="hotpost"
+    article class="contentbox" 
+        h3 = post_hash["title"]
+        p = post_hash["content"]
+    br
+    /p written by #{a_sub["username"]} (skall eventuellt läggas till senare)
+    p Posted on #{post_hash["publish_date"]}
+    p Published by user: #{post_hash["username"]}
+    br
+    -if post_hash["user_id"] == session[:id] || session[:usertype] == "admin" #Endast ägaren av posten och admins kan uppdatera eller ta bort posten.
+        a href="/posts/#{post_hash["id"]}/edit" 
+            button type="button" Edit post
+        br
+        br
+        form action="/posts/#{post_hash["id"]}/delete" method="POST"
+            input type="submit" value="Delete post"
+    
+    -if comments != nil
+        div class="commentsbox"
+            h3 Comments
+            - comments.each do |comment|
+                div class="comment"
+                    p = comment["content"]
+                    br
+                    p Posted on #{comment["publish_date"]}
+                    p From user: #{comment["username"]}
