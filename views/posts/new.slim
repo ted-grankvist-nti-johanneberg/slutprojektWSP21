@@ -1,3 +1,7 @@
+br
+a href="/forum/index" 
+    button type="button" Return to hub
+br
 h2 Create a new post here:
 form action="/posts" method="POST"
     input type="text" name="title"  placeholder="Enter title of post here"
@@ -10,7 +14,6 @@ form action="/posts" method="POST"
     select id="subid" name="subid"
         - subs.each do |subreddit|
             option value="#{subreddit["id"]}" #{subreddit["subname"]}
-            /Ta reda på vad det är för jävla skit som inte vill fungera med placeholder-texten i option taggen, varför den inte vill acceptera en variabel och bara visar blankt i webbläsaren. SVAR: du hade skrivit subreddit[:id] istället för subreddit["id"] din golvmopp.
     br
     input type="submit" value="Submit!"
     

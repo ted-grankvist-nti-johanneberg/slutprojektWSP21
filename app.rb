@@ -36,6 +36,8 @@ end
 
 get('/forum/explore') do
     ordered_subs_array = subs_in_order('db/forum2021.db')
+    hot_posts_in_order = posts_in_order('db/forum2021.db') #Här ingår endast posts som har kommentarer - inga comments inte het
+    p hot_posts_in_order
     #Lägg till mer saker som där du t.ex. hämtar Dagens posts ordnade efter antal kommentarar. Då kan du använda
     #samma metod "SELECT sub_id, count(sub_id) AS amount FROM subs_users_rel GROUP BY sub_id ORDER BY amount DESC" (för att få fram posten i en array sorterad utifrån på hur många kommenterar de har) <- fast en del modifikationer, se https://www.youtube.com/watch?v=Nl1QNFyaCO8 samt mixtra runt lite med SQL-anrop i DB browser tills du får ut rätt.
     # Dessutom skall du vid detta också endast välja ut posts som är postad idag, vilket du kan göra med en "WHERE publish_date = Time.now" eller hur du nu väljer att strukturera
@@ -46,8 +48,7 @@ get('/forum/explore') do
         top5_subs_array << ordered_subs_array[i]
         i += 1
     end
-
-    slim(:"forum/explore", locals:{ordered_subs_array: ordered_subs_array, top5_subs_array: top5_subs_array}) #Lägg mer till fler saker att skicka med i locals här såsmåningom
+    slim(:"forum/explore", locals:{ordered_subs_array: ordered_subs_array, top5_subs_array: top5_subs_array, hot_posts_in_order: hot_posts_in_order}) #Lägg mer till fler saker att skicka med i locals här såsmåningom
 end
 
 get('/subs/index') do

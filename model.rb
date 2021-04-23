@@ -90,22 +90,40 @@ def subs_in_order(path) #Returnerar en lista med subs sorterade med avseende på
   return sub_list_ordered
 end
 
-def posts_in_order(path)
+def posts_in_order(path) 
   db = connect_to_db(path)
   post_comment_amount = db.execute("SELECT post_id, count(post_id) AS amount FROM comments GROUP BY post_id ORDER BY amount DESC") #Samma som "relationsarray" i funktionen ovan fast antalet comments för en post istället räknas och presenteras tillsammans med postens post_id.
-  post_list_ordered_today = [] #En lista som kommer att byggas upp med alla post_id:s sorterade med avseende på antal kommentarer, men som endast är från idag.
+  p "Hä kommer post_comment_amount:"
+  p post_comment_amount
+  post_list_ordered_recent = [] #En lista som kommer att byggas upp med alla post_id:s sorterade med avseende på antal kommentarer, men som endast är från idag.
   post_list_ordered_older = [] #En lista som den ovan bara att alla som inte är från idag kommer in här.
   i = 0
   while i < post_comment_amount.length
     post_hash = db.execute('SELECT * FROM posts WHERE id=?', post_comment_amount[i]["post_id"]).first
     post_hash["amount"] = post_comment_amount[i]["amount"]
+    #Ev skicka in en ett attribut i post_hash med användarnamnet på användaren; ex post_hash["username"] = ... (hämta från users med user_id)
     # UNDER CONSTRUCTION:
-    #En if sats kommer här sedan som kollar ifall posten är från idag eller inte, och alla posts från idag läggs i en lista och är således sorterade efter comments
-    # Medans en annan lista, dit alla posts som ej är från idag, kommer in ordnade efter antal kommentarer
+    #En if sats kommer här sedan som kollar ifall posten är från mellan idag och imorgon, och alla posts från mellan idag och imorgon läggs i en lista och är således sorterade efter comments
+    # Medans en annan lista, dit alla posts som ej är från mellan idag och imorgon, kommer in ordnade efter antal kommentarer
     #Sedan är det bara att i hot posts printa listan med posts från idag iterativt och sedan den andra listan iterativt.
+    post_date = post_hash["publish_date"]
+    post_year_month = post_date[0,7] #Får ut första delen av "publish_date"-strängen som innehåller ex "2021/04", d.v.s år och månad.
+    post_day = post_date[9,2] #Får ut andra delen av "publish_date"-strängen som innehåller ex "19", d.v.s datum/dag.
+    now_date = Time.now.strftime("%Y/%m/%d %H:%M")
+    now_year_month = now_date[0,7] #Samma princip som för post_year_month
+    now_day = now_date[9,2] #Samma princip som för post_day
+    minimum_day = (now_date.to_i - 1) #Igår som integer
+    maximum_day = (now_date.to_i + 1) #Imorgon som integer
 
+    if (post_year_month == now_year_month) && (now_day.to_i <= maximum_day) && (now_day.to_i >= minimum_day)
+      post_list_ordered_recent << post_hash
+    else
+      post_list_ordered_older << post_hash
+    end
     i += 1
   end
+  finished_list = post_list_ordered_recent + post_list_ordered_older
+  return finished_list
 end
 
 def add_post(content, user_id, title, sub_id, publish_date)

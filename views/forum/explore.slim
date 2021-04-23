@@ -21,6 +21,20 @@ div
             p Number of subscribers: #{a_sub["amount"]}
 div 
     h2 Hot posts:
+    - if hot_posts_in_order == []
+        p There are no hot posts at the moment, if you write a comment on a recently published post, it'll turn hot.
+    - else   
+        - hot_posts_in_order.each do |a_post|
+            div 
+                h3 = a_post["title"]
+                p = a_post["content"]
+                br
+                /p written by #{a_sub["username"]} (skall läggas till senare)
+                p written on #{a_post["publish_date"]}
+                br
+                br
+                br
+
    
 /Tanken var att den första divven skall ha en class på sig med lite egenskaper, men när 
 / Aktiverar klassen på elementet så buggas det och divven buggar och lägger sig över nav-baren av oförklarliga skäl.
