@@ -105,7 +105,15 @@ post('/posts/:id/delete') do
     #Behöver on CASCADE för att ta bort alla kommentarer i databasen när en post tas bort.
 end
 
-
+post('/comments') do
+    content = params[:content]
+    user_id = session[:id] #Userid
+    post_id = params[:post_id]
+    publish_date = Time.now.strftime("%Y/%m/%d %H:%M")
+    add_comment(post_id, content, user_id, publish_date)
+    session[:current_post_id] = post_id #Behöver skicka data via sessions då det inte går via redirect.
+    redirect back #Kommando som redirectar tillbaka användaren dit den innan var.
+end
 
 get('/logout') do 
     session.destroy

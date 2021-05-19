@@ -162,6 +162,11 @@ def all_comments(post_id)
   return comments
 end
 
+def add_comment(post_id, content, user_id, publish_date)
+  db = connect_to_db('db/forum2021.db')
+  db.execute("INSERT INTO comments (post_id, content, user_id, publish_date) VALUES (?,?,?,?)", post_id, content, user_id, publish_date)
+end
+
 =begin
 def all_posts(path)
   db = connect_to_db('db/forum2021.db')
