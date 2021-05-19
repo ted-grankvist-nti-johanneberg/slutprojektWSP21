@@ -4,10 +4,10 @@ a href="/forum/explore"
 br
 h2 Edit post:
 form action="/posts/#{post_id}/update" method="POST"
-    input type="text" name="title"  placeholder="Enter new title, or skip"
+    input type="text" name="title" value="#{post_hash['title']}"
     br
     br
-    textarea name="content" cols="50" rows="20" placeholder="Enter updated content here" 
+    textarea name="content" cols="50" rows="20" #{post_hash['content']}"
     br
     br
     input type="submit" value="Update!"

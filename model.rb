@@ -58,7 +58,7 @@ def collect_info_user(username, instructions)
 end
 
 def already_logged_in?() #Kollar om det för närvarande är någon användare inloggad.
-  if session[:username] != nil
+  if session[:username] != nil #Ta bort och skicka med username som input istället från app.rb (i app.rb kan ju session hämtas)
     return true
   else
     return false

@@ -21,7 +21,10 @@ div class="hotpost"
     
     -if comments != nil
         div class="commentsbox"
-            h3 Comments
+            p Add comment:
+            form action="/comments" method="POST"
+                input type="text" name="content" placeholder="Enter comment here"
+            h3 All comments
             - comments.each do |comment|
                 div class="comment"
                     p = comment["content"]

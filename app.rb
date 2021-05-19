@@ -7,6 +7,13 @@ require_relative './model.rb'
 
 enable :sessions
 
+#Lägg till ett before-block för att kontrollera att rätt användare/en användare är inloggad eller dylika 
+#Saker inför vissa routes.
+
+#See schoolsoft
+
+#Lägg till ON-DELETE-CASCADE för att om du ex uppdaterar eller tar bort något i DB-databasen kanske det påverkar något annat i databasen, ex om du tar bort en user skall alla posts som är gjorda av den usern tas bort osv.
+
 get('/') do #Eventuellt skall denna route döpas om till "/users/new" men eftersom det också är förstasidan så får vi se, jag anser det vara ett befogat undantag från restful.
     if already_logged_in?() == true #Om inloggad användare råkar kryssa ner sidan och sedan bara går in på "localhost:4567" så är den fortfarande inloggad i sessions, men i utan denna åtgärd skulle den dirigerats till registreringssidan och behövt logga ut och logga in igen för att ta sig vidare i applikationen, men nu omdirigeras inloggade användare till /index istället.
         slim(:"forum/index")
@@ -71,8 +78,9 @@ post('/posts') do
 end
 
 get('/posts/:id/edit') do
-    post_id = params[:id]
-    slim(:"posts/edit", locals:{post_id: post_id})
+    post_id = params[:id] #Behövs för att hämta data för rätt post.
+    post_hash = acquire_post_data(post_id) #Används för att kunna skriva ut redigerbar title och content i edit-formuläret.
+    slim(:"posts/edit", locals:{post_id: post_id, post_hash: post_hash}) #Räcker egentligen med att skicka med post_hash eftersom den också innehåller post_id, men blir tydligare att skicka med post_hash till vyn.
 end
 
 get('/posts/:id') do
