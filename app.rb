@@ -15,7 +15,8 @@ enable :sessions
 #Lägg till ON-DELETE-CASCADE för att om du ex uppdaterar eller tar bort något i DB-databasen kanske det påverkar något annat i databasen, ex om du tar bort en user skall alla posts som är gjorda av den usern tas bort osv.
 
 get('/') do #Eventuellt skall denna route döpas om till "/users/new" men eftersom det också är förstasidan så får vi se, jag anser det vara ett befogat undantag från restful.
-    if already_logged_in?() == true #Om inloggad användare råkar kryssa ner sidan och sedan bara går in på "localhost:4567" så är den fortfarande inloggad i sessions, men i utan denna åtgärd skulle den dirigerats till registreringssidan och behövt logga ut och logga in igen för att ta sig vidare i applikationen, men nu omdirigeras inloggade användare till /index istället.
+    username = session[:username]
+    if already_logged_in?(username) == true #Om inloggad användare råkar kryssa ner sidan och sedan bara går in på "localhost:4567" så är den fortfarande inloggad i sessions, men i utan denna åtgärd skulle den dirigerats till registreringssidan och behövt logga ut och logga in igen för att ta sig vidare i applikationen, men nu omdirigeras inloggade användare till /index istället.
         slim(:"forum/index")
     else #Om ingen användare är inloggad så visas registreringsmenyn
         slim(:register)
@@ -151,7 +152,7 @@ post('/users') do
     gender = params[:gender]
     #Dock innan här, gör felhantering för att kolla om användaren redan finns, annars ger sinatra error, utan testa ifall den är empty typ och felhantera.
     db = connect_to_db('db/forum2021.db') #Ev flytta denna till funktionen check_registration i model.rb
-    result = check_registration(db, username, password, confirmpassword)
+    result = check_registration(db, username, password, confirmpassword, year_of_birth)
     if result == "goodtogo" #Alltså om en användare med det inskriva namnet inte finns returnerar databasen nil, och då kan vi skapa en ny användare. Funktionen från model.rb returnerar 1,2 eller 3. 1 betyder good to go, skapa användare; 2 betyder att lösenorden ej matchar och 3 betyder att användaren redan finns.
         #Lägg till user:
         password_digest = BCrypt::Password.create(params[:password])

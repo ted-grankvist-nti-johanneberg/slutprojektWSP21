@@ -13,16 +13,17 @@ def connect_to_db2(path) #För att få ut data från databasen i en array istäl
 end
 =end #P.g.a används ännu ej
 
-def check_registration(db, username, password, confirmpassword)
+def check_registration(db, username, password, confirmpassword, year_of_birth) #Validering av password och t.ex. att year_of_birth är en siffra
     result = db.execute("SELECT * FROM users WHERE username=?", username).first
     if result == nil
-        if password == confirmpassword
-            return "goodtogo" #Good to go, bara att skapa användaren.
-        else
-            return "wrongpass" #Lösenorden matchar inte
-        end
+      if password == confirmpassword
+        if year_of_birth.length == 4 && year_of_birth.scan(/\D/).empty? == false #Villkoret är true om year_of_birth endast innehåller siffror eller är tom, vilket vi vill (antingen ett riktigt )
+        return "goodtogo" #Good to go, bara att skapa användaren.
+      else
+        return "wrongpass" #Lösenorden matchar inte
+      end
     else
-        return "userexist" #Användaren finns redan
+      return "userexist" #Användaren finns redan
     end
 end
 
@@ -57,8 +58,8 @@ def collect_info_user(username, instructions)
   #Vad den skall efterfråga med sitt SQL anrop (eventuellt behöver du göra flera av dessa funktioner och kan inte ha en "standardfunktion" som täcker allt)
 end
 
-def already_logged_in?() #Kollar om det för närvarande är någon användare inloggad.
-  if session[:username] != nil #Ta bort och skicka med username som input istället från app.rb (i app.rb kan ju session hämtas)
+def already_logged_in?(username) #Kollar om det för närvarande är någon användare inloggad.
+  if username != nil #Ta bort och skicka med username som input istället från app.rb (i app.rb kan ju session hämtas)
     return true
   else
     return false
@@ -180,6 +181,17 @@ def acquire_post_data(post_id)
   temp_user = db.execute('SELECT username FROM users WHERE id= ?', post["user_id"]).first
   post["username"] = temp_user["username"] #Skickar med username i hashen till varje post
   return post
+end
+
+def check_digits(year_of_birth)
+  
+  answer = input.scan(/\D/).empty? #True om endast siffror eller tom sträng. RegEx: https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
+  if answer == true
+    p "Du har skrivit endast siffror (eller tom sträng)"
+  else
+    p "Du har skrivit tecken som inte är siffror"
+  end
+  val()
 end
 
 
