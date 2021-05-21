@@ -158,6 +158,17 @@ post('/users') do
         password_digest = BCrypt::Password.create(params[:password])
         add_user(username, password_digest, year_of_birth, country, gender)
         redirect('/users/created')
+    elsif result == "usernametoolong"
+        content = "That username is too long, try a username with no more than 20 characters"
+        returnto = "/"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "invalidyear"
+        #Felhantering
+        content = "Invalid year of birth"
+        returnto = "/"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
     elsif result == "wrongpass"
         #Felhantering
         content = "Your passwords don't match, please try again."

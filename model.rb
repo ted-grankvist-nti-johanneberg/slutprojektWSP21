@@ -14,17 +14,22 @@ end
 =end #P.g.a används ännu ej
 
 def check_registration(db, username, password, confirmpassword, year_of_birth) #Validering av password och t.ex. att year_of_birth är en siffra
-    result = db.execute("SELECT * FROM users WHERE username=?", username).first
-    if result == nil
-      if password == confirmpassword
-        if year_of_birth.length == 4 && year_of_birth.scan(/\D/).empty? == false #Villkoret är true om year_of_birth endast innehåller siffror eller är tom, vilket vi vill (antingen ett riktigt )
+  result = db.execute("SELECT * FROM users WHERE username=?", username).first
+  if result == nil
+    if password == confirmpassword
+      if username.length > 20
+        return "usernametoolong"
+      elsif year_of_birth.length != 4 || year_of_birth.scan(/\D/).empty? != true #Andra villkoret är true om year_of_birth endast innehåller siffror eller är tom, vilket vi vill (ett riktigt årtal på formen XXXX eftersöks)
+        return "invalidyear"
+      else #Tydligare kod med att skriva else istället för att bara end:a if-satsen.
         return "goodtogo" #Good to go, bara att skapa användaren.
-      else
-        return "wrongpass" #Lösenorden matchar inte
       end
     else
-      return "userexist" #Användaren finns redan
+      return "wrongpass" #Lösenorden matchar inte
     end
+  else
+    return "userexist" #Användaren finns redan
+  end
 end
 
 def add_user(username, password_digest, year_of_birth, country, gender)
@@ -168,13 +173,6 @@ def add_comment(post_id, content, user_id, publish_date)
   db.execute("INSERT INTO comments (post_id, content, user_id, publish_date) VALUES (?,?,?,?)", post_id, content, user_id, publish_date)
 end
 
-=begin
-def all_posts(path)
-  db = connect_to_db('db/forum2021.db')
-  allposts = db.execute("SELECT * FROM comments")
-end
-=end
-
 def acquire_post_data(post_id)
   db = connect_to_db('db/forum2021.db')
   post = db.execute("SELECT * FROM posts WHERE id = ?", post_id).first
@@ -183,27 +181,16 @@ def acquire_post_data(post_id)
   return post
 end
 
-def check_digits(year_of_birth)
-  
-  answer = input.scan(/\D/).empty? #True om endast siffror eller tom sträng. RegEx: https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
-  if answer == true
-    p "Du har skrivit endast siffror (eller tom sträng)"
-  else
-    p "Du har skrivit tecken som inte är siffror"
-  end
-  val()
+=begin
+def all_posts(path)
+  db = connect_to_db('db/forum2021.db')
+  allposts = db.execute("SELECT * FROM comments")
 end
-
-
-
+=end
 
 =begin
 def find_subs_where(path, condition)
   db = connect_to_db2(path)
   result = db.execute("SELECT * FROM subs WHERE username=? ", username).first
-  ...
 end
 =end
-
-
-
