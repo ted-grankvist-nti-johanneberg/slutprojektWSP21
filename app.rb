@@ -74,8 +74,35 @@ post('/posts') do
     content = params[:content]
     user_id = session[:id] #Userid
     publish_date = Time.now.strftime("%Y/%m/%d %H:%M") # Time.now.strftime("%Y/%m/%d %H:%M") #=> "2021/04/19 14:09"
-    add_post(content, user_id, title, sub_id, publish_date)
-    redirect('/forum/index')
+    result = check_post(content, user_id, title, sub_id)
+    if result == "goodtogo" 
+        add_post(content, user_id, title, sub_id, publish_date)
+        redirect('/forum/index')
+    elsif result == "invaliduser"
+        #Felhantering
+        content = "Try logging in before creating a post."
+        returnto = "/showlogin"
+        linktext = "Login"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "invalidtitle"
+        #Felhantering
+        content = "Your title is either nonexistent or too long - it must be no longer than 40 characters."
+        returnto = "/posts/new"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "nocontent"
+        #Felhantering
+        content = "Your post doesn't include any content, which is sort of it's purpose."
+        returnto = "/posts/new"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "invalidsub"
+        #Felhantering
+        content = "You have somehow entered an invalid sub, try one of the existing listed ones."
+        returnto = "/posts/new"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    end
 end
 
 get('/posts/:id/edit') do

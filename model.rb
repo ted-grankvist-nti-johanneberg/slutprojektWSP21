@@ -153,6 +153,28 @@ def delete_post(post_id)
   #Behöver ON CASCADE för att ta bort alla comments i databasen när en post tas bort.
 end
 
+def check_post(content, user_id, title, sub_id)
+  subs = all_subs('db/forum2021.db')
+  sub_id_list = []
+  i = 0
+  while i < subs.length
+    sub_id_list << subs[i]["id"]
+    i += 1
+  end
+  
+  if user_id == nil #Kontrollerar så att en guest-user inte av misstag kan skapa en post.
+    return "invaliduser"
+  elsif title.length > 40 || title.length == 0
+    return "invalidtitle"
+  elsif content.length == 0
+    return "nocontent"
+  elsif sub_id_list.include?(sub_id.to_i) != true #Om sub_id:en inte finns har något tokigt hänt.
+    return "invalidsub"
+  else
+    return "goodtogo"
+  end
+end
+
 def all_comments(post_id)
   db = connect_to_db('db/forum2021.db')
   comments = db.execute("SELECT * FROM comments WHERE post_id = ?", post_id)
