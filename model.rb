@@ -17,7 +17,9 @@ def check_registration(db, username, password, confirmpassword, year_of_birth) #
   result = db.execute("SELECT * FROM users WHERE username=?", username).first
   if result == nil
     if password == confirmpassword
-      if username.length > 20
+      if password.length < 8 
+        return "passwordshort"
+      elsif username.length > 20
         return "usernametoolong"
       elsif year_of_birth.length != 4 || year_of_birth.scan(/\D/).empty? != true #Andra villkoret är true om year_of_birth endast innehåller siffror eller är tom, vilket vi vill (ett riktigt årtal på formen XXXX eftersöks)
         return "invalidyear"
@@ -96,7 +98,39 @@ def subs_in_order(path) #Returnerar en lista med subs sorterade med avseende på
   return sub_list_ordered
 end
 
-def posts_in_order(path) 
+def acquire_sub_data(sub_id) 
+  db = connect_to_db('db/forum2021.db')
+  subhash = db.execute("SELECT * FROM subs WHERE id = ?", sub_id).first
+  return subhash
+end
+
+def is_user_subscribed(user_id, sub_id)
+  db = connect_to_db('db/forum2021.db')
+  all_relations = db.execute("SELECT * FROM subs_users_rel")
+  p "Here's all relations: #{all_relations}"
+  potential_relations = all_relations.find_all {|rel1| rel1["sub_id"] == sub_id.to_i} #En array med alla potentiella relationer, d.v.s alla relationer relaterade till given sub_id. Om sub:en inte har några subscribers blir denna en tom array.
+  p "Here's potnetila relations: #{potential_relations}"
+  sub_user_relation = potential_relations.find {|rel2| rel2["user_id"] == user_id.to_i} #Specifik relation mellan given sub_id och user_id, om usern inte är subscribad blir denna nil.
+  p "Here's specific relation: #{sub_user_relation}"
+  if sub_user_relation != nil
+    return [true, sub_user_relation]
+  else
+    return false
+  end
+end
+
+def subscribe(user_id, sub_id) 
+  db = connect_to_db('db/forum2021.db')
+  db.execute("INSERT INTO subs_users_rel (user_id, sub_id) VALUES(?,?)", user_id, sub_id)
+end
+
+def unsubscribe(user_id, sub_id) 
+  db = connect_to_db('db/forum2021.db')
+  sub_user_relation = is_user_subscribed(user_id, sub_id)[1] #Får här hashen med relationen till user_id och sub_id, och därav även id:et till själva relationen.
+  db.execute("DELETE FROM subs_users_rel WHERE id = ?", sub_user_relation["id"])
+end
+
+def posts_in_order(path) #Sorted by relevancy
   db = connect_to_db(path)
   post_comment_amount = db.execute("SELECT post_id, count(post_id) AS amount FROM comments GROUP BY post_id ORDER BY amount DESC") #Samma som "relationsarray" i funktionen ovan fast antalet comments för en post istället räknas och presenteras tillsammans med postens post_id.
   p "Hä kommer post_comment_amount:"
@@ -131,6 +165,20 @@ def posts_in_order(path)
   end
   finished_list = post_list_ordered_recent + post_list_ordered_older
   return finished_list
+end
+
+def posts_from_sub(sub_id) #Sorted by date, from new to old.
+  db = connect_to_db('db/forum2021.db')
+  all_posts = db.execute("SELECT * FROM posts WHERE sub_id = ?", sub_id)
+  i = 0
+  while i < all_posts.length
+    post_date = all_posts[i]["publish_date"]
+    new_date = post_date[0..3] + post_date[5..6] + post_date[8..9] + post_date[11..12] + post_date[14..15] #Eftersom jag ändrat från formatet som man får via Time.now kan jag inte bara köra .to_i utan får köra en egen mer manuell metod för att göra om post datum till jämförbara integers. Ex: "2021/04/04 21:59" => "202104042159"
+    all_posts[i]["publish_date"] = new_date.to_i
+    i += 1
+  end
+  sorted_posts = all_posts.sort_by{|hash| hash["publish_date"]}.reverse #Sorterar alla hashes inuti all_posts array med avseende på nyckeln "publish_date" och reversar så att störst publish_date (d.v.s nyast) hamnar i början av arrayen.
+  return sorted_posts
 end
 
 def add_post(content, user_id, title, sub_id, publish_date)
@@ -175,6 +223,16 @@ def check_post(content, user_id, title, sub_id)
   end
 end
 
+def check_update(content, title) 
+  if title.length > 40 || title.length == 0
+    return "invalidtitle"
+  elsif content.length == 0
+    return "nocontent"
+  else
+    return "goodtogo"
+  end
+end
+
 def all_comments(post_id)
   db = connect_to_db('db/forum2021.db')
   comments = db.execute("SELECT * FROM comments WHERE post_id = ?", post_id)
@@ -193,6 +251,16 @@ end
 def add_comment(post_id, content, user_id, publish_date)
   db = connect_to_db('db/forum2021.db')
   db.execute("INSERT INTO comments (post_id, content, user_id, publish_date) VALUES (?,?,?,?)", post_id, content, user_id, publish_date)
+end
+
+def check_comment(content, user_id) #Behöver ej kontrollera post_id då comment-fältet ej visas utan att man är inne på sidan för en specifik post.
+  if user_id == nil #Kontrollerar så att en guest-user inte av misstag kan skapa en post.
+    return "invaliduser"
+  elsif content.length == 0
+    return "nocontent"
+  else
+    return "goodtogo"
+  end
 end
 
 def acquire_post_data(post_id)

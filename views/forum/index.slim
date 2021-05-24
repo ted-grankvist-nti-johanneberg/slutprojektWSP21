@@ -3,20 +3,20 @@ a href="/forum/explore"
     button type="button" Explore
 br
 br
--if session[:usertype] != "guest"
+-if session[:usertype] != "guest" && session[:usertype] != nil
     a href="/forum/mysubs" 
         button type="button" My Subs
     br
-    br
-    a href="/"  
+    /br
+    /a href="/"  
         button type="button" My Profile
-    br
+    /br
     br
     a href="/posts/new" 
         button type="button" Create post
     br
     br
--if session[:usertype] == "admin" 
+/-if session[:usertype] == "admin" 
     a href="/"
         button type="button" Manage database
     br

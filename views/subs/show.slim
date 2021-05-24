@@ -1,0 +1,36 @@
+br
+a href="/forum/explore" 
+    button type="button" Return to explore
+br
+h1 Welcome to r/#{sub_hash["subname"]}
+h4 Amount of subscribers: #{sub_hash["amount"]}
+p #{sub_hash["description"]}
+-if session[:usertype] != "guest" && session[:usertype] != nil && is_user_subscribed(session[:id], sub_hash["id"]) == false 
+    form action="/subs/#{sub_hash["id"]}/subscribe" method="POST"
+        input type="submit" value="Subscribe to this subreddit"
+    br
+-else 
+    form action="/subs/#{sub_hash["id"]}/unsubscribe" method="POST"
+        input type="submit" value="Unsubscribe"
+    br
+br
+h3 Here's all the posts on this sub:
+- sorted_posts.each do |a_post|
+            div class="hotpost"
+                article class="contentbox"
+                    h3 = a_post["title"]
+                    p = a_post["content"]
+                br
+                p Posted on #{a_post["publish_date"]}
+                p Published by user: #{a_post["username"]}
+                a href="/posts/#{a_post["id"]}" 
+                    button type="button" View post
+                br
+                br
+                -if a_post["user_id"] == session[:id] || session[:usertype] == "admin" #Endast ägaren av posten och admins kan uppdatera eller ta bort posten.
+                    a href="/posts/#{a_post["id"]}/edit" 
+                        button type="button" Edit post
+                    br
+                    br
+                    form action="/posts/#{a_post["id"]}/delete" method="POST"
+                        input type="submit" value="Delete post"

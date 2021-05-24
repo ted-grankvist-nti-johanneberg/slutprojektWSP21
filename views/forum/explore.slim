@@ -16,7 +16,8 @@ div
     ol
         - top5_subs_array.each do |a_sub| 
             li 
-                p = "Name: " + "r/" + a_sub["subname"]
+                p Name:
+                a href="/subs/#{a_sub["id"]}"  r/#{a_sub["subname"]}
                 p Number of subscribers: #{a_sub["amount"]}
 div 
     h2 Hot posts:

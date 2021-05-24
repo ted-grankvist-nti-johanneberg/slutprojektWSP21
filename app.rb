@@ -30,7 +30,7 @@ end
 get('/guestlogin') do #Jag tror att detta skall vara en GET eftersom ingen data direkt skickas med i själva http-requesten.
     session[:username] = nil
     session[:id] = nil
-    session[:usertype] = "guest"
+    session[:usertype] = nil 
     slim(:"forum/index")
 end
 
@@ -61,6 +61,28 @@ end
 get('/subs/index') do
     subs_array = subs_in_order('db/forum2021.db')
     slim(:"subs/index", locals:{subs_array: subs_array})
+end
+
+get('/subs/:id') do
+    sub_id = params[:id]
+    all_subs = subs_in_order('db/forum2021.db')
+    sub_hash = all_subs.find {|sub1| sub1["id"] == sub_id.to_i} #Returnerar den subbens hash vars id har id:et sub_id, och som inkluderar nyckeln "amount".
+    sorted_posts = posts_from_sub(sub_id)
+    slim(:"subs/show", locals:{sub_id: sub_id, sorted_posts: sorted_posts, sub_hash: sub_hash}) #Behöver ev inte skicka med "sub_id" eftersom den ändå hämtas som nyckel med värde i sorted_posts
+end
+
+post('/subs/:id/subscribe') do 
+    sub_id = params[:id]
+    user_id = session[:id]
+    subscribe(user_id, sub_id) 
+    redirect back
+end
+
+post('/subs/:id/unsubscribe') do
+    sub_id = params[:id]
+    user_id = session[:id]
+    unsubscribe(user_id, sub_id) 
+    redirect back
 end
 
 get('/posts/new') do
@@ -97,7 +119,7 @@ post('/posts') do
         linktext = "Try again"
         slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
     elsif result == "invalidsub"
-        #Felhantering
+        #Felhantering, specifikt denna borde ej vara möjlig men den är implementerad för säkerhetens skull.
         content = "You have somehow entered an invalid sub, try one of the existing listed ones."
         returnto = "/posts/new"
         linktext = "Try again"
@@ -118,12 +140,25 @@ get('/posts/:id') do
     slim(:"posts/show", locals:{post_id: post_id, comments: comments, post_hash: post_hash}) #Behöver ev inte skicka med "post_id" eftersom den ändå hämtas som nyckel med värde i post_hash
 end
 
-post('/posts/:id/update') do
+post('/posts/:id/update') do #Skall läggas till beforeblock som kontrolllerar att användaren är inloggad med rätt inlogg (ägaren elr admin)
     post_id = params[:id].to_i
     content = params[:content]
     title = params[:title]
-    update_post(content, title, post_id)
-    redirect('/forum/explore')
+    result = check_update(content, title)
+    if result == "goodtogo"
+        update_post(content, title, post_id)
+        redirect('/forum/explore')
+    elsif result == "invalidtitle"
+        content = "Your title is either nonexistent or too long - it must be no longer than 40 characters."
+        returnto = "/posts/#{post_id}/edit"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "nocontent"
+        content = "Your post doesn't include any content now, which is sort of it's purpose."
+        returnto = "/posts/#{post_id}/edit"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    end
 end
 
 post('/posts/:id/delete') do
@@ -138,9 +173,22 @@ post('/comments') do
     user_id = session[:id] #Userid
     post_id = params[:post_id]
     publish_date = Time.now.strftime("%Y/%m/%d %H:%M")
-    add_comment(post_id, content, user_id, publish_date)
-    session[:current_post_id] = post_id #Behöver skicka data via sessions då det inte går via redirect.
-    redirect back #Kommando som redirectar tillbaka användaren dit den innan var.
+    result = check_comment(content, user_id)
+    if result == "goodtogo"
+        add_comment(post_id, content, user_id, publish_date)
+        session[:current_post_id] = post_id #Behöver skicka data via sessions då det inte går via redirect.
+        redirect back #Kommando som redirectar tillbaka användaren dit den innan var.
+    elsif result == "invaliduser"
+        content = "Try logging in before commenting."
+        returnto = "/showlogin"
+        linktext = "Login"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "nocontent"
+        content = "Your comment doesn't include any content, which is sort of it's purpose."
+        returnto = "/posts/#{post_id.to_i}"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    end
 end
 
 get('/logout') do 
@@ -154,14 +202,23 @@ end
 post('/login') do 
     username = params[:username]
     password = params[:password]
-    result = verify_user(username, password)
-    if result[0] == true 
-        session[:id] = result[1] #användarid:et returneras med från en array i verify_user funktionen i model.rb.
-        session[:usertype] = result[2] #Användarens usertype, d.v.s typ av användare, vilket används till authorization på flera ställen i webbapplikationen.
-        session[:username] = username
-        redirect('/forum/index')
+    if session[:lastlogin] == nil || Time.now - session[:lastlogin] > 15 #15 sekunders cooldown mellan varje inloggningsförsök. Om inget inloggningsförsök har skett än skall användaren också kunna logga in, därav första villkoret.
+        result = verify_user(username, password)
+        if result[0] == true 
+            session[:id] = result[1] #användarid:et returneras med från en array i verify_user funktionen i model.rb.
+            session[:usertype] = result[2] #Användarens usertype, d.v.s typ av användare, vilket används till authorization på flera ställen i webbapplikationen.
+            session[:username] = username
+            redirect('/forum/index')
+        else
+            session[:lastlogin] = Time.now #Skyddar servern från att nästkommanden inloggningsförsök spammas (att man försöker brute-force hacka) m.h.a första if-satsen i routen.
+            content = "You have either entered the wrong password or used an invalid username."
+            returnto = "/showlogin"
+            linktext = "Try again"
+            slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+        end
     else
-        content = "You have either entered the wrong password or used an invalid username."
+        session[:lastlogin] = Time.now #Skyddar servern från att nästkommanden inloggningsförsök spammas (att man försöker brute-force hacka) m.h.a första if-satsen i routen.
+        content = "Please wait at least 15 seconds inbetween every log-in attempt (For the security of your account)."
         returnto = "/showlogin"
         linktext = "Try again"
         slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
@@ -186,6 +243,7 @@ post('/users') do
         add_user(username, password_digest, year_of_birth, country, gender)
         redirect('/users/created')
     elsif result == "usernametoolong"
+        #Felhantering
         content = "That username is too long, try a username with no more than 20 characters"
         returnto = "/"
         linktext = "Try again"
@@ -199,6 +257,12 @@ post('/users') do
     elsif result == "wrongpass"
         #Felhantering
         content = "Your passwords don't match, please try again."
+        returnto = "/"
+        linktext = "Try again"
+        slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    elsif result == "passwordshort"
+        #Felhantering
+        content = "That password is too short, please enter a password with at least 8 characters."
         returnto = "/"
         linktext = "Try again"
         slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})

@@ -21,7 +21,7 @@ div class="hotpost"
     
     -if comments != nil
         div class="commentsbox"
-            -if session[:usertype] != "guest"
+            -if session[:usertype] != "guest" && session[:usertype] != nil
                 h4 Add comment:
                 form action="/comments" method="POST"
                     textarea name="content" cols="35" rows="15" placeholder="Enter comment here"
