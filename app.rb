@@ -7,12 +7,34 @@ require_relative './model.rb'
 
 enable :sessions
 
+include Model
+
 #Lägg till ett before-block för att kontrollera att rätt användare/en användare är inloggad eller dylika 
 #Saker inför vissa routes.
 
 #See schoolsoft
 
 #Lägg till ON-DELETE-CASCADE för att om du ex uppdaterar eller tar bort något i DB-databasen kanske det påverkar något annat i databasen, ex om du tar bort en user skall alla posts som är gjorda av den usern tas bort osv.
+
+before do
+    if  session[:usertype] == nil && request.path_info != '/' &&  request.path_info != '/showlogin' &&  request.path_info != '/guestlogin' && request.path_info != '/login' && request.path_info != '/users' && request.path_info != '/users/created' #Login routen är med p.g.a annars hinner en som loggar in inte bli assignad en session[:usertype] = "user" eller "admin". users-routar är med för annars går det inte att skapa en ny användare om man inte är inloggad, vilket skulle vara väldigt konstigt.
+       redirect('/showlogin') #Användaren skickas till loginsidan.
+    end
+end
+
+before('/showlogin') do #Om redan inloggad användare skriver in att de vill komma in på login-sidan skickas de endast tillbaka till dit de var.
+    if session[:usertype] == "admin" || session[:usertype] == "user"
+        redirect back
+    end
+end
+
+before('/posts/new') do #Om guest-users eller icke-inloggade skriver in att de vill komma till create post skickas dem tillbaka till dit de var.
+    if session[:usertype] != "admin" && session[:usertype] != "user"
+        redirect back
+    end
+end
+
+
 
 get('/') do #Eventuellt skall denna route döpas om till "/users/new" men eftersom det också är förstasidan så får vi se, jag anser det vara ett befogat undantag från restful.
     username = session[:username]
@@ -30,7 +52,7 @@ end
 get('/guestlogin') do #Jag tror att detta skall vara en GET eftersom ingen data direkt skickas med i själva http-requesten.
     session[:username] = nil
     session[:id] = nil
-    session[:usertype] = nil 
+    session[:usertype] = "guest" 
     slim(:"forum/index")
 end
 
@@ -191,6 +213,12 @@ post('/comments') do
     end
 end
 
+post('/comments/:id/delete') do
+    comment_id = params[:id]
+    delete_comment(comment_id)
+    redirect back
+end
+
 get('/logout') do 
     session.destroy
     redirect('/')
@@ -198,7 +226,6 @@ end
 
 
 
-#Implementera cooldown osv på login samt ev ytterligare validering + "strong params" mha black/whitelist.
 post('/login') do 
     username = params[:username]
     password = params[:password]
@@ -280,6 +307,14 @@ get('/users/created') do
     returnto = "/showlogin"
     linktext = "Login"
     slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+end
+
+post('/users/:id/delete') do
+    user_id = params[:id]
+    session.destroy
+    delete_user(user_id)
+    redirect('/')
+    #Behöver delete on CASCADE för att ta bort alla posts och kommentarer från denna användare.
 end
 
 #Tänk på att när man har en CRUD-funktionalitet på en sida och sedan ändrar något i den, så redirectas man tillbaka till routen som visade upp själv gränssnittet 

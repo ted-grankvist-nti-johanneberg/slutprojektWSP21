@@ -2,6 +2,10 @@ br
 a href="/forum/explore" 
     button type="button" Return to explore
 br
+br
+a href="/subs/#{post_hash["sub_id"]}" 
+    button type="button" Return to sub
+br
 div class="hotpost"
     article class="contentbox" 
         h3 = post_hash["title"]
@@ -35,3 +39,9 @@ div class="hotpost"
                     br
                     p Posted on #{comment["publish_date"]}
                     p From user: #{comment["username"]}
+                    -if comment["user_id"] == session[:id] || session[:usertype] == "admin" #Endast ägaren av posten och admins kan uppdatera eller ta bort posten.
+                        br
+                        form action="/comments/#{comment["id"]}/delete" method="POST"
+                            input type="submit" value="Delete comment"
+                        br
+    

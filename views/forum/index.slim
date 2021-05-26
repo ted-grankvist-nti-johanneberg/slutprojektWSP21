@@ -4,18 +4,27 @@ a href="/forum/explore"
 br
 br
 -if session[:usertype] != "guest" && session[:usertype] != nil
-    a href="/forum/mysubs" 
+    /a href="/forum/mysubs" 
         button type="button" My Subs
-    br
+    /br
     /br
     /a href="/"  
         button type="button" My Profile
     /br
-    br
+    /br
     a href="/posts/new" 
         button type="button" Create post
     br
     br
+    br
+    br
+    br
+    br
+    br
+    form action="/users/#{session[:id]}/delete" method="POST"
+        input type="submit" value="Delete this account"
+    p BE AWARE, CLICKING THIS WILL PERMANENTLY DELETE YOUR ACCOUNT!
+
 /-if session[:usertype] == "admin" 
     a href="/"
         button type="button" Manage database

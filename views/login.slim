@@ -1,5 +1,10 @@
-h1 Log in
+h1 Log in to access website
 form action="login" method="POST"
     input type="text" name="username" placeholder="enter username"
     input type="password" name="password" Placeholder="enter password"
     input type="submit" value="Log in!"
+-if session[:usertype] != "guest"
+    p -Or login as guest:
+    a href="/guestlogin" 
+        button type="button" Login as guest
+    br
