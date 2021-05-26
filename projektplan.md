@@ -14,5 +14,13 @@ https://gyazo.com/834653998a1081654c0ab14ea86f0bd5
 ## 3. Databas med ER-diagram (Bild på ER-diagram).
 https://gyazo.com/30ddc89150db12de4ab4603c5610a9bc
 ## 4. Arkitektur (Beskriv filer och mappar - vad gör/innehåller de?).
+app.rb är controllern i webbsevern - den innehåller kod som får in info från webbsidan som att användaren tryckte på en specifik knapp och då vet app.rb vad den knappen gör. Den kör som en server som visar var clienter ska gå och allmänt vad som händer på webbläsaren. Här finns alltså alla routes, sessions som också återfinns i views, en del felhantering och authorization - t.ex. before block.
+Model.rb är en separat del av servern som hjälper app.rb se mer snyggare ut genom att hjälpa app.rb med olika funktioner som ofta kan bli väldigt långa och inte ha dem i app.rb. Dessutom är alla SQL-anrop/databasinteraktion delegerade till model.rb och den tar hand om  valideringar och authentication
+
+I views mappen finns alla views som är alla sidor som användare kan besöka/mötas av - d.v.s gränssnittet. I mappen finns det slim filer som app.rb kan slima ihop för att visa upp för clienten vad som ska visas. Här finns t.ex. en standardiserad felmeddelandeslimfil message.slim som visar upp en given text och en länk som med en get-route leder en tillbaka/dit användaren behöver ta sig.
+
+Public mappen är en map som clienten öppet kan se och innehåller information som webbsidan behöver visa som till exempel css kod. (Om jag hade haft bilder hade dessa återfunnits även här). 
+
+DB mappen innehåller databasen till webbservern. I databasen finns webbsidans information som personer som har gjort konton eller i mitt fall posts och comments som personer har skrivit. Dessutom finns en relationstabell subs_users_rel som beskriver subscriptions mellan users och användare, d.v.s en många till många relation där en användare kan vara subscribed till många subs, men en sub kan även ha flera användare som subscriptions. Det är denna databas som webbservern bygger på och som interageras med hela tiden indirekt via slimfilerna, indirekt via app.rb och direkt via model.rb.
 
 
